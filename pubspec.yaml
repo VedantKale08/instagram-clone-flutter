@@ -40,6 +40,9 @@ dependencies:
   firebase_storage: ^11.6.11
   cloud_firestore: ^4.15.10
   flutter_svg: ^2.0.10+1
+  image_picker: ^1.0.7
+  provider: ^6.1.2
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +71,8 @@ flutter:
     - assets/svgs/logos_instagram.svg
     - assets/svgs/profile.svg
     - assets/images/profile.png
+    #icons
+    - assets/images/chat.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
