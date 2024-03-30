@@ -43,6 +43,7 @@ dependencies:
   image_picker: ^1.0.7
   provider: ^6.1.2
   font_awesome_flutter: ^10.7.0
+  photo_manager: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +74,15 @@ flutter:
     - assets/images/profile.png
     #icons
     - assets/images/chat.png
+    - assets/svgs/chat.svg
+    - assets/svgs/home.svg
+    - assets/svgs/home_outline.svg
+    - assets/svgs/User.svg
+    - assets/svgs/User_fill.svg
+    - assets/svgs/reel.svg
+    - assets/svgs/Add.svg
+    - assets/svgs/Search.svg
+    - assets/svgs/Search_fill.svg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
