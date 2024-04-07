@@ -44,6 +44,7 @@ dependencies:
   provider: ^6.1.2
   font_awesome_flutter: ^10.7.0
   photo_manager: ^3.0.0
+  photo_gallery: ^2.2.1
 
 dev_dependencies:
   flutter_test:
