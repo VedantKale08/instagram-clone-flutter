@@ -17,12 +17,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    addData();
-  }
-
-  addData()async{
-    UserProvider _userProvider = Provider.of(context,listen: false);
-    return _userProvider.refreshUser();
   }
 
   @override

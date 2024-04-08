@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/screens/add_post_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:provider/provider.dart';
 
 class ParentContainer extends StatefulWidget {
   const ParentContainer({super.key});
@@ -45,6 +47,7 @@ class _ParentContainerState extends State<ParentContainer> {
     // TODO: implement initState
     super.initState();
     _pageController = PageController();
+    addData();
   }
 
   @override
@@ -64,6 +67,12 @@ class _ParentContainerState extends State<ParentContainer> {
     _pageController.jumpToPage(pageIndex);
   }
 
+
+  addData() async {
+    UserProvider _userProvider = Provider.of(context, listen: false);
+    return _userProvider.refreshUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -73,8 +82,9 @@ class _ParentContainerState extends State<ParentContainer> {
             _pageIndex = 0;
             _pageController.jumpToPage(_pageIndex);
           });
+          return false;
         }
-        return false;
+        return true;
       },
       child: Scaffold(
         // app bar
@@ -106,12 +116,12 @@ class _ParentContainerState extends State<ParentContainer> {
           controller: _pageController,
           onPageChanged: onPageChanged,
           physics: const NeverScrollableScrollPhysics(),
-          children: const [
-            Center(child: Text("Home")),
-            Center(child: Text("Search")),
-            AddPostScreen(),
-            Center(child: Text("Reel")),
-            Center(child: Text("Profile")),
+          children: [
+            const Center(child: Text("Home")),
+            const Center(child: Text("Search")),
+            AddPostScreen(onPageChanged: onPageChanged, navigate:navigate),
+            const Center(child: Text("Reel")),
+            const Center(child: Text("Profile")),
           ],
         ),
       

@@ -7,12 +7,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:instagram_clone/models/user.dart';
+import 'package:instagram_clone/providers/user_provider.dart';
+import 'package:instagram_clone/resources/firestore_methods.dart';
+import 'package:instagram_clone/screens/parent_layout.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:provider/provider.dart';
 
 class AddPostScreen extends StatefulWidget {
-  const AddPostScreen({super.key});
+  final Function onPageChanged;
+  final Function navigate;
+  const AddPostScreen({super.key, required this.onPageChanged, required this.navigate});
 
   @override
   State<AddPostScreen> createState() => _AddPostScreenState();
@@ -20,6 +27,7 @@ class AddPostScreen extends StatefulWidget {
 
 class _AddPostScreenState extends State<AddPostScreen> {
   final List<Widget> _mediaList = [];
+  final List<Uint8List?> _fileList = [];
   Uint8List? _file;
   int currentPage = 1;
   int? lastPage;
@@ -42,7 +50,7 @@ _fetchMediaImages() async {
       }
 
       List<AssetEntity> media =
-          await album[0].getAssetListPaged(page: currentPage, size: 30);
+          await album[0].getAssetListPaged(page: currentPage, size: 50);
 
       currentPage++;
 
@@ -50,7 +58,6 @@ _fetchMediaImages() async {
 
       if (media.isNotEmpty) {
         List<Widget> temp = [];
-        List<Uint8List> tempFiles = [];
 
         for (var asset in media) {
           if (asset.type == AssetType.image) {
@@ -75,8 +82,16 @@ _fetchMediaImages() async {
           }
         }
 
+        for (var asset in media) {
+          if (asset.type == AssetType.image) {
+            // Read image bytes as Uint8List
+            Uint8List? imageBytes = await asset.originBytes;
+            _fileList.add(imageBytes); // Add image bytes to the list
+          }
+        }
+
         setState(() {
-          _mediaList.addAll(temp.reversed);
+          _mediaList.addAll(temp);
           _isLoading = false;
         });
 
@@ -112,8 +127,15 @@ _fetchMediaImages() async {
           title: const Text("New post", style: TextStyle(fontSize: 20)),
           actions: [
             GestureDetector(
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => AddCaptionScreen(file:_file, fileWidget : _mediaList[_index]))),
+              // onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              //     builder: (context) => AddCaptionScreen(
+              //         file: _file ?? _fileList[0],
+              //         onPageChanged: widget.onPageChanged,
+              //         navigate: widget.navigate))),
+              onTap: () {
+                widget.navigate(0);
+                widget.onPageChanged(0);
+              },
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
@@ -137,9 +159,7 @@ _fetchMediaImages() async {
                         mainAxisSpacing: 1,
                         crossAxisSpacing: 1),
                     itemBuilder: (context, index) {
-                      return _mediaList.isNotEmpty ? 
-                         _file==null ? _mediaList[_index] : Image.memory(_file!, fit: BoxFit.cover)
-                        : Container();
+                      return _file!=null ? Image.memory(_file!, fit: BoxFit.cover) : Image.memory(_fileList[0]!, fit: BoxFit.cover);
                     },
                   )),
               
@@ -194,11 +214,13 @@ _fetchMediaImages() async {
                   mainAxisSpacing: 1,
                   crossAxisSpacing: 2
                 ), 
+                physics: const ScrollPhysics(),
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: (){
                       setState(() {
                         _index = index;
+                        _file = _fileList[index];
                       });
                     },
                     child: _mediaList[index],
@@ -211,10 +233,13 @@ _fetchMediaImages() async {
   }
 }
 
+
+
 class AddCaptionScreen extends StatefulWidget {
   final Uint8List? file;
-  final Widget? fileWidget;
-  const AddCaptionScreen({super.key, required this.file, required this.fileWidget});
+  final Function onPageChanged;
+  final Function navigate;
+  const AddCaptionScreen({super.key, required this.file, required this.onPageChanged, required this.navigate});
 
   @override
   State<AddCaptionScreen> createState() => _AddCaptionScreenState();
@@ -223,34 +248,98 @@ class AddCaptionScreen extends StatefulWidget {
 class _AddCaptionScreenState extends State<AddCaptionScreen> {
 
   Uint8List? _file;
-  Widget? _fileWidget;
   final TextEditingController _descriptionController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _file = widget.file;
-    _fileWidget = widget.fileWidget;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void postImage(
+    String uid,
+    String username,
+    String profileImage,
+  ) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      String res = await FirebaseStoreMethods().uploadPost(
+        _descriptionController.text, 
+        _file, 
+        uid, 
+        username, 
+        profileImage
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+      if(res == "success"){
+        showSnackBar(context, "Successfully posted");
+        widget.navigate(0);
+        widget.onPageChanged(0);
+      }else{
+        showSnackBar(context, res);
+      }
+    } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        showSnackBar(context, e.toString());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final UserProvider userProvider = Provider.of<UserProvider>(context);
+
+    return  Scaffold(
         appBar: AppBar(
           backgroundColor: mobileBackgroundColor,
           leading: GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: const Icon(Icons.arrow_back)),
           title: const Text("New post", style: TextStyle(fontSize: 20)),
+          actions: [
+            GestureDetector(
+              onTap: () => postImage(
+                userProvider.getUser.uid,
+                userProvider.getUser.username, 
+                userProvider.getUser.image
+              ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  "Post",
+                  style: TextStyle(color: blueColor, fontSize: 16),
+                ),
+              ),
+            )
+          ],
         ),
         body: SingleChildScrollView(
           child: SafeArea(
             child: Column(
               children: [
+
+                _isLoading ? const LinearProgressIndicator() : Container(),
+
+                const Divider(color: mobileBackgroundColor,),
+
                  SizedBox(
                     height: 340,
-                    child: _file != null ? Image.memory(_file!,fit: BoxFit.contain,) : _fileWidget,
+                    child: _file != null ? Image.memory(_file!,fit: BoxFit.contain,) : Container(),
                 ),
           
                  Container(
@@ -307,23 +396,6 @@ class _AddCaptionScreenState extends State<AddCaptionScreen> {
                           size: 20, color: secondaryColor),
                     ],
                   ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 30.0),
-                  child: Container(
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius: BorderRadius.circular(5)),
-                      child: const Text(
-                        "Post",
-                        style: TextStyle(
-                            color: mobileBackgroundColor,
-                            fontWeight: FontWeight.bold),
-                      )),
                 ),
               ],
             ),
