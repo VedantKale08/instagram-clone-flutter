@@ -46,6 +46,7 @@ dependencies:
   photo_manager: ^3.0.0
   photo_gallery: ^2.2.1
   uuid: ^4.3.3
+  gradient_borders: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,7 @@ flutter:
     - assets/svgs/logos_instagram.svg
     - assets/svgs/profile.svg
     - assets/images/profile.png
+    - assets/images/story_image.png
     #icons
     - assets/images/chat.png
     - assets/svgs/chat.svg

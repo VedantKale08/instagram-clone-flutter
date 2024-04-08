@@ -17,9 +17,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 
 class AddPostScreen extends StatefulWidget {
-  final Function onPageChanged;
-  final Function navigate;
-  const AddPostScreen({super.key, required this.onPageChanged, required this.navigate});
+  const AddPostScreen({super.key});
 
   @override
   State<AddPostScreen> createState() => _AddPostScreenState();
@@ -123,19 +121,14 @@ _fetchMediaImages() async {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: mobileBackgroundColor,
-          leading: const Icon(Icons.arrow_back),
+          leading: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: const Icon(Icons.arrow_back)
+          ),
           title: const Text("New post", style: TextStyle(fontSize: 20)),
           actions: [
             GestureDetector(
-              // onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              //     builder: (context) => AddCaptionScreen(
-              //         file: _file ?? _fileList[0],
-              //         onPageChanged: widget.onPageChanged,
-              //         navigate: widget.navigate))),
-              onTap: () {
-                widget.navigate(0);
-                widget.onPageChanged(0);
-              },
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddCaptionScreen(file: _file ?? _fileList[0]))),
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
@@ -237,9 +230,7 @@ _fetchMediaImages() async {
 
 class AddCaptionScreen extends StatefulWidget {
   final Uint8List? file;
-  final Function onPageChanged;
-  final Function navigate;
-  const AddCaptionScreen({super.key, required this.file, required this.onPageChanged, required this.navigate});
+  const AddCaptionScreen({super.key, required this.file});
 
   @override
   State<AddCaptionScreen> createState() => _AddCaptionScreenState();
@@ -287,8 +278,7 @@ class _AddCaptionScreenState extends State<AddCaptionScreen> {
       });
       if(res == "success"){
         showSnackBar(context, "Successfully posted");
-        widget.navigate(0);
-        widget.onPageChanged(0);
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }else{
         showSnackBar(context, res);
       }

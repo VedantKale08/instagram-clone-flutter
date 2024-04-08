@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/screens/add_post_screen.dart';
+import 'package:instagram_clone/screens/home_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:provider/provider.dart';
 
@@ -64,6 +66,11 @@ class _ParentContainerState extends State<ParentContainer> {
   }
 
   void navigate(int pageIndex) {
+    if (pageIndex == 2) {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => AddPostScreen()));
+      return;
+    }
     _pageController.jumpToPage(pageIndex);
   }
 
@@ -75,58 +82,23 @@ class _ParentContainerState extends State<ParentContainer> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if(_pageIndex == 2){
-          setState(() {
-            _pageIndex = 0;
-            _pageController.jumpToPage(_pageIndex);
-          });
-          return false;
-        }
-        return true;
-      },
-      child: Scaffold(
-        // app bar
-        appBar: _pageIndex == 2 ? null :  AppBar(
-          backgroundColor: mobileBackgroundColor,
-          title: SvgPicture.asset(
-            "assets/svgs/logos_instagram.svg",
-            color: primaryColor,
-            height: 35,
-          ),
-          actions: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Icon(
-                Icons.favorite_border_rounded,
-                color: primaryColor,
-                size: 28,
-              ),
-            ),
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: SvgPicture.asset('assets/svgs/chat.svg',
-                    color: primaryColor)),
-          ],
-        ),
-      
+    return Scaffold(
         // body
         body: PageView(
           controller: _pageController,
           onPageChanged: onPageChanged,
           physics: const NeverScrollableScrollPhysics(),
-          children: [
-            const Center(child: Text("Home")),
-            const Center(child: Text("Search")),
-            AddPostScreen(onPageChanged: onPageChanged, navigate:navigate),
-            const Center(child: Text("Reel")),
-            const Center(child: Text("Profile")),
+          children: const [
+            HomeScreen(),
+            Center(child: Text("Search")),
+            SizedBox(),
+            Center(child: Text("Reel")),
+            Center(child: Text("Profile")),
           ],
         ),
       
         // bottom bar
-        bottomNavigationBar: _pageIndex == 2 ? null : Container(
+        bottomNavigationBar: Container(
           decoration: const BoxDecoration(
             border:
                 Border(top: BorderSide(color: Color.fromARGB(255, 35, 35, 35))),
@@ -147,7 +119,6 @@ class _ParentContainerState extends State<ParentContainer> {
             }).toList(),
           ),
         ),
-      ),
     );
   }
 }
