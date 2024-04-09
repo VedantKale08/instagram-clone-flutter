@@ -58,4 +58,25 @@ class FirebaseStoreMethods{
       print(e.toString());
     }
   }
+
+  Future<void> commentPost(String postId, String uid, String comment, String name, String profilePic) async {
+    try {
+      if(comment.isNotEmpty){
+        String commentId = const Uuid().v1();
+        await _firestore.collection("posts").doc(postId).collection("comments").doc(commentId).set({
+          'commentId':commentId,
+          'uid':uid,
+          'name':name,
+          'profilePic':profilePic,
+          'comment':comment,
+          'commented_at':DateTime.now()
+        });
+        print("Success");
+      }else{
+        print("Text is empty");
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 }

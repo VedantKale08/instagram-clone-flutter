@@ -6,6 +6,7 @@ class LikeAnimation extends StatefulWidget {
   final Duration duration;
   final VoidCallback? onEnd;
   final bool smallLike;
+  
   const LikeAnimation({
     Key? key,
     required this.child,

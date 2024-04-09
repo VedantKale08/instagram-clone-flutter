@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/resources/firestore_methods.dart';
+import 'package:instagram_clone/screens/comment_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/widgets/like_animation.dart';
 import 'package:instagram_clone/widgets/story.dart';
@@ -23,16 +25,25 @@ class _PostCardState extends State<PostCard> {
   
   late final _post;
   bool isLikeAnimating = false;
+  int commentLength = 0;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _post = widget.post;
+    getComments();
   }
 
   void handleLikePost(User user) async {
       await FirebaseStoreMethods().likePost(_post['postId'], user.uid, _post['likes']);
+  }
+
+  void getComments() async {
+    QuerySnapshot commentsCollection = await FirebaseFirestore.instance.collection("posts").doc(widget.post["postId"]).collection("comments").get();
+    setState(() {
+      commentLength = commentsCollection.docs.length;
+    });
   }
 
   @override
@@ -113,10 +124,34 @@ class _PostCardState extends State<PostCard> {
                       ),
                     ),
 
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: SvgPicture.asset('assets/svgs/comment.svg',
-                          color: primaryColor, width: 23),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => CommentScreen(
+                            post: widget.post,
+                          ),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            var begin = Offset(0.0, 1.0);
+                            var end = Offset.zero;
+                            var curve = Curves.ease;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+
+                            return SlideTransition(
+                              position: animation.drive(tween),
+                              child: child,
+                            );
+                          },
+                        ));
+                      },
+  
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: SvgPicture.asset('assets/svgs/comment.svg',
+                            color: primaryColor, width: 23),
+                      ),
                     ),
                     SvgPicture.asset(
                       'assets/svgs/share.svg',
@@ -158,12 +193,12 @@ class _PostCardState extends State<PostCard> {
                   )
                 ) : Container(),
 
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
                   child: Align(
                       alignment: Alignment.centerLeft,
                       child:
-                          Text("View all 1301 comments", style: TextStyle(fontSize: 13, color: secondaryColor))),
+                          Text("View all ${commentLength} comments", style: const TextStyle(fontSize: 13, color: secondaryColor))),
                 ),
             ],
           )

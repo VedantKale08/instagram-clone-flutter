@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/screens/add_post_screen.dart';
+import 'package:instagram_clone/screens/explore_screen.dart';
 import 'package:instagram_clone/screens/home_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -41,7 +42,7 @@ class _ParentContainerState extends State<ParentContainer> {
     },
   ];
 
-  int _pageIndex = 0;
+  int _pageIndex = 1;
   late PageController _pageController;
 
   @override
@@ -89,8 +90,8 @@ class _ParentContainerState extends State<ParentContainer> {
           onPageChanged: onPageChanged,
           physics: const NeverScrollableScrollPhysics(),
           children: const [
+            ExploreScreen(),
             HomeScreen(),
-            Center(child: Text("Search")),
             SizedBox(),
             Center(child: Text("Reel")),
             Center(child: Text("Profile")),

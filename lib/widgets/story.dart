@@ -33,15 +33,16 @@ class StoryImage extends StatelessWidget {
   final double radius;
   final double padding;
   final String? image;
-  const StoryImage({super.key, required this.radius, required this.padding, this.image});
+  final bool noStory;
+  const StoryImage({super.key, required this.radius, required this.padding, this.image, this.noStory = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(60),
-        border: const GradientBoxBorder(
-          width: 2,
+        border:  GradientBoxBorder(
+          width:  noStory ? 0 : 2,
           gradient: LinearGradient(
             colors: [
               Color(0xFF405DE6),
