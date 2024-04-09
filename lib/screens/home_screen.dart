@@ -65,8 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: LinearProgressIndicator(color: blueColor),
                     );
                   }
-                  print(snapshot.data!.docs[0].data());
+
                   return ListView.builder(
+                    key: UniqueKey(),
                     scrollDirection: Axis.vertical,
                     shrinkWrap: true,
                     physics: const ScrollPhysics(),

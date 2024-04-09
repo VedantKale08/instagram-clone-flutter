@@ -29,13 +29,13 @@ class _LikeAnimationState extends State<LikeAnimation>
     super.initState();
     controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: widget.duration.inMilliseconds ~/ 2),
+      duration: widget.duration,
     );
     scale = Tween<double>(begin: 1, end: 1.2).animate(controller);
   }
 
   @override
-  void didUpdateWidget(covariant LikeAnimation oldWidget) {
+  void didUpdateWidget(LikeAnimation oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.isAnimating != oldWidget.isAnimating) {
@@ -43,24 +43,22 @@ class _LikeAnimationState extends State<LikeAnimation>
     }
   }
 
-  startAnimation() async {
-    if (widget.isAnimating || widget.smallLike) {
-      await controller.forward();
-      await controller.reverse();
-      await Future.delayed(
-        const Duration(milliseconds: 200),
-      );
-
-      if (widget.onEnd != null) {
-        widget.onEnd!();
-      }
-    }
-  }
-
   @override
   void dispose() {
-    super.dispose();
     controller.dispose();
+    super.dispose();
+  }
+
+  void startAnimation() async {
+    if (widget.isAnimating || widget.smallLike) {
+      if (!controller.isAnimating) {
+        await controller.forward();
+        await controller.reverse();
+        if (widget.onEnd != null) {
+          widget.onEnd!();
+        }
+      }
+    }
   }
 
   @override

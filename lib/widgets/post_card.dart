@@ -33,18 +33,10 @@ class _PostCardState extends State<PostCard> {
 
   void handleLikePost(User user) async {
       await FirebaseStoreMethods().likePost(_post['postId'], user.uid, _post['likes']);
-      // setState(() {
-      //   if (_post["likes"].contains(user.uid)) {
-      //     _post["likes"].remove(user.uid);
-      //   } else {
-      //     _post["likes"].add(user.uid);
-      //    }
-      // });
   }
 
   @override
   Widget build(BuildContext context) {
-
     final User user = Provider.of<UserProvider>(context).getUser;
 
     return Column(
@@ -67,7 +59,6 @@ class _PostCardState extends State<PostCard> {
         GestureDetector(
           onDoubleTap: () async {
             handleLikePost(user);
-            // await FirebaseStoreMethods().likePost(_post['postId'], user.uid, _post['likes']);
             setState(() {
               isLikeAnimating = true;
             });
@@ -76,7 +67,7 @@ class _PostCardState extends State<PostCard> {
             alignment: Alignment.center,
             children: [
               Container(
-                constraints: BoxConstraints(maxHeight: 375),
+                constraints: const BoxConstraints(maxHeight: 375),
                 child: Image.network(
                   _post["postUrl"],
                   fit: BoxFit.contain,
@@ -113,7 +104,6 @@ class _PostCardState extends State<PostCard> {
                       smallLike: true,
                       child: GestureDetector(
                         onTap: () async {
-                          // await FirebaseStoreMethods().likePost(_post['postId'], user.uid, _post['likes']);
                           handleLikePost(user);
                         },
                         child:  _post["likes"].contains(user.uid) ? 
