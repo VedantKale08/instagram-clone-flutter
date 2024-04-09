@@ -42,7 +42,7 @@ class _ParentContainerState extends State<ParentContainer> {
     },
   ];
 
-  int _pageIndex = 1;
+  int _pageIndex = 0;
   late PageController _pageController;
 
   @override
@@ -90,8 +90,8 @@ class _ParentContainerState extends State<ParentContainer> {
           onPageChanged: onPageChanged,
           physics: const NeverScrollableScrollPhysics(),
           children: const [
-            ExploreScreen(),
             HomeScreen(),
+            ExploreScreen(),
             SizedBox(),
             Center(child: Text("Reel")),
             Center(child: Text("Profile")),
