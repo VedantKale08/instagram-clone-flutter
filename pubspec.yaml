@@ -76,6 +76,7 @@ flutter:
     - assets/svgs/profile.svg
     - assets/images/profile.png
     - assets/images/story_image.png
+    - assets/images/post_image.png
     #icons
     - assets/images/chat.png
     - assets/svgs/chat.svg
@@ -87,6 +88,11 @@ flutter:
     - assets/svgs/Add.svg
     - assets/svgs/Search.svg
     - assets/svgs/Search_fill.svg
+    - assets/svgs/like.svg
+    - assets/svgs/like_fill.svg
+    - assets/svgs/bookmark.svg
+    - assets/svgs/comment.svg
+    - assets/svgs/share.svg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

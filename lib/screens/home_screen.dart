@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -24,6 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     // User user = Provider.of<UserProvider>(context).getUser;
 
+    final Stream<QuerySnapshot> _postStream = FirebaseFirestore.instance.collection("posts")
+                    .orderBy('uploaded_at', descending: true)
+                    .snapshots();
+
     return Scaffold(
       appBar: AppBar(
           backgroundColor: mobileBackgroundColor,
@@ -47,11 +52,29 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: primaryColor)),
           ],
         ),
-        body: const SingleChildScrollView(
+        body: SingleChildScrollView(
           child: Column(
             children: [
               StoriesSection(),
-              PostCard()
+              
+              StreamBuilder(
+                stream: _postStream, 
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if(snapshot.connectionState == ConnectionState.waiting){
+                    return const Center(
+                      child: LinearProgressIndicator(color: blueColor),
+                    );
+                  }
+                  print(snapshot.data!.docs[0].data());
+                  return ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const ScrollPhysics(),
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) => PostCard(post:snapshot.data!.docs[index].data())
+                  );
+                },
+              )
             ],
           ),
         )
