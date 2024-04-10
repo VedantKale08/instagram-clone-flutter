@@ -4,6 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:instagram_clone/resources/auth_methods.dart';
+import 'package:instagram_clone/resources/firestore_methods.dart';
+import 'package:instagram_clone/screens/login_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/story.dart';
@@ -24,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   var postData = [];
   bool _isLoading = false;
   User user = FirebaseAuth.instance.currentUser!;
+  late bool isFollowing;
 
   @override
   void initState() {
@@ -49,6 +53,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       QuerySnapshot postSnap = await FirebaseFirestore.instance.collection("posts").where("uid", isEqualTo: widget.uid).get();
       setState(() {
         userData = snap.data() as Map<String, dynamic>;
+
+        if(userData["followers"].contains(user.uid)){
+          isFollowing = true;
+        }else{
+          isFollowing = false;
+        }
         postData = postSnap.docs;
         _isLoading = false;
       });
@@ -70,11 +80,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               child: Icon(Icons.arrow_back),
             )),
           title: Text(userData["username"] ?? "", style: TextStyle(fontSize: 20)),
-          actions: const [
+          actions: [
+             user.uid == widget.uid ? 
              Padding(
               padding: EdgeInsets.symmetric(horizontal:16),
-              child: Icon(Icons.more_vert_rounded),
-            )
+              child: InkWell(
+                onTap: () async {
+                  await AuthMethods().logOut();
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+                },
+                child: const Text("Log Out", style: TextStyle(color: Colors.red),),
+              ),
+            ) : Container()
           ],
         ),
 
@@ -123,7 +140,28 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Expanded(
+                      user.uid != widget.uid ? Expanded(
+                        child: TextButton(
+                          onPressed: () async {
+                            await FirebaseStoreMethods().followUser(user.uid, userData["uid"]);
+
+                            setState(() {
+                              isFollowing ? userData["followers"].length-- : userData["followers"].length++;
+                              isFollowing = !isFollowing;
+                            });
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStatePropertyAll(!isFollowing ? blueColor : Colors.transparent),
+                            foregroundColor: MaterialStatePropertyAll(primaryColor),
+                            shape: MaterialStatePropertyAll(
+                              RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8)),)
+                            ),
+                            side: MaterialStatePropertyAll(BorderSide(width: 1,color:
+                                                      isFollowing ? primaryColor : blueColor))
+                          ),
+                          child: isFollowing ? Text("Unfollow") : Text("Follow"),
+                        ),
+                      ) : Expanded(
                         child: TextButton(
                           onPressed: (){},
                           style: const ButtonStyle(
@@ -133,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                               RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8)))
                             )
                           ),
-                          child: user.uid == widget.uid ? Text("Edit profile") :  Text("Follow"),
+                          child: Text("Edit profile"),
                         ),
                       ), 
             

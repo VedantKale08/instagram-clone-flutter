@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
+import 'package:instagram_clone/utils/colors.dart';
 
 class Story extends StatefulWidget {
   final bool isMyStory;
@@ -18,7 +19,20 @@ class _StoryState extends State<Story> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Column(
         children: [
-          StoryImage(padding: 4, radius: 35,image: widget.image),
+          !widget.isMyStory ? 
+            StoryImage(padding: 4, radius: 35,image: widget.image)
+          :
+            Stack(
+              alignment: AlignmentDirectional.bottomEnd,
+              children: [
+                StoryImage(padding: 4, radius: 35, image: widget.image),
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: blueColor,
+                  child: Icon(Icons.add, size: 15,),
+                )
+              ],
+            ),
           Text(
             widget.isMyStory ? "Your story" : "aalia_12",
             style: TextStyle(fontSize: 12),
