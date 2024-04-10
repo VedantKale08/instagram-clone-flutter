@@ -42,7 +42,7 @@ class AuthMethods {
         //store to firestore database
         model.User user = model.User(
             uid: cred.user!.uid,
-            username: username,
+            username: username.toLowerCase(),
             email: email,
             bio: bio,
             followers: [],

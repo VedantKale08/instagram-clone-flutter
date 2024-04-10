@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -7,6 +8,7 @@ import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/screens/add_post_screen.dart';
 import 'package:instagram_clone/screens/explore_screen.dart';
 import 'package:instagram_clone/screens/home_screen.dart';
+import 'package:instagram_clone/screens/profile_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:provider/provider.dart';
 
@@ -83,43 +85,52 @@ class _ParentContainerState extends State<ParentContainer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        // body
-        body: PageView(
-          controller: _pageController,
-          onPageChanged: onPageChanged,
-          physics: const NeverScrollableScrollPhysics(),
-          children: const [
-            HomeScreen(),
-            ExploreScreen(),
-            SizedBox(),
-            Center(child: Text("Reel")),
-            Center(child: Text("Profile")),
-          ],
-        ),
-      
-        // bottom bar
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            border:
-                Border(top: BorderSide(color: Color.fromARGB(255, 35, 35, 35))),
+    return WillPopScope(
+      onWillPop: () async {
+        if (_pageIndex == 1 || _pageIndex == 4) {
+          _pageController.jumpToPage(0);
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+          // body
+          body: PageView(
+            controller: _pageController,
+            onPageChanged: onPageChanged,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid),
+              const HomeScreen(),
+              const ExploreScreen(),
+              const SizedBox(),
+              const Center(child: Text("Reel")),
+            ],
           ),
-          padding: const EdgeInsets.only(top: 8),
-          child: CupertinoTabBar(
-            backgroundColor: mobileBackgroundColor,
-            activeColor: primaryColor,
-            currentIndex: _pageIndex,
-            onTap: navigate,
-            items: items.asMap().entries.map((entry) {
-              final Map<String, dynamic> item = entry.value;
-      
-              return BottomNavigationBarItem(
-                icon: SvgPicture.asset(item['icon'],color: primaryColor),
-                activeIcon:SvgPicture.asset(item['activeIcon'],color: primaryColor)
-              );
-            }).toList(),
+        
+          // bottom bar
+          bottomNavigationBar: Container(
+            decoration: const BoxDecoration(
+              border:
+                  Border(top: BorderSide(color: Color.fromARGB(255, 35, 35, 35))),
+            ),
+            padding: const EdgeInsets.only(top: 8),
+            child: CupertinoTabBar(
+              backgroundColor: mobileBackgroundColor,
+              activeColor: primaryColor,
+              currentIndex: _pageIndex,
+              onTap: navigate,
+              items: items.asMap().entries.map((entry) {
+                final Map<String, dynamic> item = entry.value;
+        
+                return BottomNavigationBarItem(
+                  icon: SvgPicture.asset(item['icon'],color: primaryColor),
+                  activeIcon:SvgPicture.asset(item['activeIcon'],color: primaryColor)
+                );
+              }).toList(),
+            ),
           ),
-        ),
+      ),
     );
   }
 }

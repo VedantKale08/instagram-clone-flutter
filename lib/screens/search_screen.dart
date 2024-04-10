@@ -12,6 +12,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  String _searchText = "";
 
   @override
   void dispose() {
@@ -42,7 +43,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 border:Border(bottom: BorderSide(color: Color.fromARGB(255, 35, 35, 35))),
               ),
               child: TextFormField(
-                controller: _searchController,
+                // controller: _searchController,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.search),
                     hintText: "Search",
@@ -51,6 +52,11 @@ class _SearchScreenState extends State<SearchScreen> {
                     filled: true,
                     contentPadding: EdgeInsets.symmetric(vertical: 8),
                   ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchText = value;
+                    });
+                  },
                   onFieldSubmitted: (String _) {
                     print(_);
                   },
@@ -59,9 +65,9 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
 
-        body: FutureBuilder(  
-          future: FirebaseFirestore.instance.collection("users").where("username", isGreaterThanOrEqualTo: _searchController.text).get(),
-          builder: (context, snapshot) {
+        body: _searchText.isNotEmpty  ? StreamBuilder(  
+          stream: FirebaseFirestore.instance.collection("users").orderBy("username").startAt([_searchText.toLowerCase()]).endAt([_searchText.toLowerCase() + "\uf8ff"]).snapshots(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const LinearProgressIndicator(color: blueColor);
             }
@@ -71,6 +77,7 @@ class _SearchScreenState extends State<SearchScreen> {
             }
 
             return ListView.builder(
+              key: UniqueKey(),
               itemCount: snapshot.data!.docs.length,
               itemBuilder: (context, index) {
                 return Padding(
@@ -92,7 +99,7 @@ class _SearchScreenState extends State<SearchScreen> {
               },
             );
           },
-        ),
+        ) : Container(),
       ),
     );
   }

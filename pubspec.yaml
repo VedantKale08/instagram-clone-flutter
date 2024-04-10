@@ -94,6 +94,8 @@ flutter:
     - assets/svgs/bookmark.svg
     - assets/svgs/comment.svg
     - assets/svgs/share.svg
+    - assets/svgs/post.svg
+    - assets/svgs/tag.svg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
