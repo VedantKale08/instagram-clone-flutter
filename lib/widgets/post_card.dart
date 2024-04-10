@@ -181,7 +181,7 @@ class _PostCardState extends State<PostCard> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: _post["username"],
+                          text: "${_post["username"]} ",
                           style:const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                         ),
                         TextSpan(

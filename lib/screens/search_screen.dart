@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:instagram_clone/screens/profile_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -83,6 +84,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical:2),
                   child: ListTile(
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProfileScreen(uid: snapshot.data!.docs[index]["uid"]))),
                     leading: CircleAvatar(
                       backgroundImage: NetworkImage(snapshot.data!.docs[index]["image"]),
                       radius: 35,

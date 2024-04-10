@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -20,6 +21,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   late TabController _tabController;
   int _index = 0;
   var userData = {};
+  var postData = [];
+  bool _isLoading = false;
+  User user = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
@@ -38,9 +42,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   void getData() async {
     try {
+      setState(() {
+      _isLoading = true;
+      });
       DocumentSnapshot snap  = await FirebaseFirestore.instance.collection("users").doc(widget.uid).get();
+      QuerySnapshot postSnap = await FirebaseFirestore.instance.collection("posts").where("uid", isEqualTo: widget.uid).get();
       setState(() {
         userData = snap.data() as Map<String, dynamic>;
+        postData = postSnap.docs;
+        _isLoading = false;
       });
     } catch (e) {
       showSnackBar(context, e.toString());
@@ -49,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return _isLoading ? const Center(child: CircularProgressIndicator()) : SafeArea(
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: mobileBackgroundColor,
@@ -59,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               padding: EdgeInsets.all(8.0),
               child: Icon(Icons.arrow_back),
             )),
-          title: Text(userData["username"], style: TextStyle(fontSize: 20)),
+          title: Text(userData["username"] ?? "", style: TextStyle(fontSize: 20)),
           actions: const [
              Padding(
               padding: EdgeInsets.symmetric(horizontal:16),
@@ -80,17 +90,17 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       StoryImage(radius: 45, padding: 2, image: userData["image"]),
-                      const Column(
+                      Column(
                         children: [
-                          Text("1",
-                              style: TextStyle(
+                          Text("${postData.length}",
+                              style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
-                          Text("Posts", style: TextStyle(fontSize: 14))
+                          const Text("Posts", style: TextStyle(fontSize: 14))
                         ],
                       ),
                       Column(
                         children: [
-                          Text(userData["followers"].length.toString(),
+                          Text("${userData["followers"] != null ? userData["followers"].length : 0}",
                               style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
                           const Text("Followers", style: TextStyle(fontSize: 14)),
@@ -98,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       ),
                       Column(
                         children: [
-                          Text(userData["followings"].length.toString(),
+                          Text("${userData["followings"] != null ? userData["followings"].length : 0}",
                               style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
                           const Text("Following", style: TextStyle(fontSize: 14)),
@@ -108,8 +118,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
             
                   const SizedBox(height: 6),
-                  Text(userData["username"]),
-                  Text(userData["bio"]),
+                  Text(userData["username"] ?? ""),
+                  Text(userData["bio"] ?? ""),
                   const SizedBox(height: 6),
                   Row(
                     children: [
@@ -123,13 +133,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                               RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8)))
                             )
                           ),
-                          child: Text("Follow"),
+                          child: user.uid == widget.uid ? Text("Edit profile") :  Text("Follow"),
                         ),
                       ), 
             
                       const SizedBox(width: 10),
             
-                      Expanded(
+                      user.uid != widget.uid ? Expanded(
                         child: TextButton(
                           onPressed: () {},
                           style: const ButtonStyle(
@@ -141,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           ),
                           child: Text("Message"),
                         ),
-                      )
+                      ) : Container()
                     ],
                   ),
                 ],
@@ -174,7 +184,21 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
-                    children: [Text("Posts"), Text("Tag")],
+                    children: [
+                      GridView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        physics: const ScrollPhysics(),
+                        gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 1,
+                          crossAxisSpacing: 2),
+                        itemCount: postData.length,
+                        itemBuilder: (context, index) {
+                          return Image.network(postData[index]["postUrl"], fit: BoxFit.cover);
+                        },
+                      ), 
+                      Text("Tag")],
                   ),
                 )
           ],

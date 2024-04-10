@@ -100,11 +100,11 @@ class _ParentContainerState extends State<ParentContainer> {
             onPageChanged: onPageChanged,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid),
               const HomeScreen(),
               const ExploreScreen(),
               const SizedBox(),
               const Center(child: Text("Reel")),
+              ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid),
             ],
           ),
         
